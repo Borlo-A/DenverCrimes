@@ -7,7 +7,9 @@ package it.polito.tdp.crimes;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.crimes.db.Arco;
 import it.polito.tdp.crimes.model.Model;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -25,16 +27,16 @@ public class FXMLController {
     private URL location;
 
     @FXML // fx:id="boxCategoria"
-    private ComboBox<?> boxCategoria; // Value injected by FXMLLoader
+    private ComboBox<String> boxCategoria; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxMese"
-    private ComboBox<?> boxMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnAnalisi"
     private Button btnAnalisi; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxArco"
-    private ComboBox<?> boxArco; // Value injected by FXMLLoader
+    private ComboBox<Arco> boxArco; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnPercorso"
     private Button btnPercorso; // Value injected by FXMLLoader
@@ -44,12 +46,14 @@ public class FXMLController {
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
-
+    	txtResult.appendText("\n" + this.model.calcolaPercorso(boxArco.getValue()));
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	this.model.creaGrafo(boxCategoria.getValue(), boxMese.getValue());
+    	txtResult.setText(this.model.getArchiSopraMedia().toString());
+    	boxArco.setItems(FXCollections.observableArrayList(this.model.getArchiSopraMedia()));
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -65,5 +69,9 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	// this.boxCategoria.setValue(FXCollections.observableArrayList(this.model.getCategories()));
+    	this.boxCategoria.getItems().addAll(this.model.getCategories());
+    	for(int i=1; i<13; i++)
+    		this.boxMese.getItems().add(i);
     }
 }

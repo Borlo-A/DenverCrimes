@@ -53,5 +53,109 @@ public class EventsDao {
 			return null ;
 		}
 	}
+	
+	public List<String> getCategories()
+	{
+		String sql = "SELECT offense_category_id FROM events GROUP BY offense_category_id";
+		
+		try 
+		{
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			List<String> result = new ArrayList<>() ;
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				try {
+					result.add(res.getString("offense_category_id"));
+					
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+			
+			conn.close();
+			return result ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+		
+	}
+	
+	public List<String> getTypes(String categoria, int mese)
+	{
+		String sql = "SELECT DISTINCT offense_type_id FROM events "
+					+ "WHERE offense_category_id = ? AND "
+					+ "MONTH(reported_date)= ?" ;
+		List<String> result = new ArrayList<>() ;
+		
+		try 
+		{
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setString(1, categoria);
+			st.setInt(2, mese);
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				try {
+					result.add(res.getString("offense_type_id"));
+					
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+			
+			conn.close();
+			return result ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+	}
+	
+	public List<Arco> getArchi(String categoria, int mese)
+	{
+		String sql = "SELECT e1.offense_type_id, e2.offense_type_id, COUNT(distinct e1.neighborhood_id) as peso "
+				+ "FROM EVENTS e1, EVENTS e2 "
+				+ "WHERE e1.offense_category_id = ? AND e1.offense_category_id = e2.offense_category_id AND MONTH(e1.reported_date) = ? AND MONTH(e1.reported_date) = MONTH(e2.reported_date) AND e1.offense_type_id != e2.offense_type_id AND e1.neighborhood_id = e2.neighborhood_id "
+				+ "GROUP BY e1.offense_type_id, e2.offense_type_id" ;
+		
+		List<Arco> result = new ArrayList<>() ;
+		
+		try 
+		{
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setString(1, categoria);
+			st.setInt(2, mese);
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				try {
+					result.add(new Arco(res.getString("e1.offense_type_id"), res.getString("e2.offense_type_id"), res.getInt("peso")));
+					
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+			
+			conn.close();
+			return result ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+	}
 
 }
